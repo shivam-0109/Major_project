@@ -39,7 +39,7 @@ jobs:
             pytest pytest-cov pytest-xdist pytest-html \
             PyQt5 pytest-qt \
             opencv-python-headless \
-            pandas numpy scikit-learn \
+            pandas numpy  \
             requests flask flask-cors \
             matplotlib seaborn plotly \
              
