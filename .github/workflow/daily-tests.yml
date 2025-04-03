@@ -4,63 +4,70 @@ on:
   schedule:
     - cron: '0 0 * * *'  # Runs at midnight UTC daily
   workflow_dispatch:      # Allow manual triggering
+  push:
+    branches: [ main ]
+  pull_request:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30   # Increase timeout for complex dependencies
+    runs-on: ubuntu-24.04  # Updated to latest Ubuntu version
+    timeout-minutes: 30
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4  # Updated from v3
 
       - name: Set up Python 3.10
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5  # Updated from v3
         with:
           python-version: '3.10'
-          cache: 'pip'    # Cache dependencies for faster runs
+          cache: 'pip'
+          cache-dependency-path: 'requirements.txt'
 
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgl1-mesa-glx xvfb  # Required for PyQt5/GUI tests
+          sudo apt-get install -y \
+            libgl1-mesa-glx \
+            xvfb \
+            libglib2.0-0
 
       - name: Install Python dependencies
         run: |
-          python -m pip install --upgrade pip wheel
-          pip install -r requirements.txt  # If you have one
-          pip install pytest pytest-cov pytest-xdist pytest-html
-          pip install PyQt5 pytest-qt   # Core GUI testing deps
-          pip install opencv-python pandas numpy scikit-learn  # Key ML deps
-          pip install tensorflow torch  # Deep learning frameworks
-          # Install remaining packages (grouped for efficiency)
+          python -m pip install --upgrade pip wheel setuptools
+          pip install -r requirements.txt --no-cache-dir
           pip install \
+            pytest pytest-cov pytest-xdist pytest-html \
+            PyQt5 pytest-qt \
+            opencv-python-headless \
+            pandas numpy scikit-learn \
+            tensorflow-cpu torch \
             requests flask flask-cors \
             matplotlib seaborn plotly \
             pymongo motor \
             langchain transformers \
-            ultralytics mediapipe \
-            pytest-xdist  # Parallel test execution
+            ultralytics mediapipe
 
-      - name: Run tests with Xvfb (for GUI tests)
+      - name: Run tests with Xvfb
         run: |
-          xvfb-run pytest tests/ \
+          xvfb-run -a pytest tests/ \
             --cov=. \
             --cov-report=xml \
             --cov-report=html \
             --junitxml=test-results/results.xml \
-            -n auto  # Parallel tests using all cores
+            -n auto
 
       - name: Upload test artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4  # Updated from v3
         if: always()
         with:
-          name: test-reports
+          name: test-reports-${{ github.run_id }}
           path: |
             htmlcov/
             test-results/
             coverage.xml
+          retention-days: 7
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4  # Updated from v3
         if: success()
