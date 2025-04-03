@@ -40,12 +40,9 @@ jobs:
             PyQt5 pytest-qt \
             opencv-python-headless \
             pandas numpy scikit-learn \
-            tensorflow-cpu torch \
             requests flask flask-cors \
             matplotlib seaborn plotly \
-            pymongo motor \
-            langchain transformers \
-            ultralytics mediapipe
+             
 
       - name: Run tests with Xvfb
         run: |
