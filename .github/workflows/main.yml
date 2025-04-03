@@ -5,13 +5,13 @@ on:
     - cron: '0 0 * * *'  # Runs at midnight UTC daily
   workflow_dispatch:      # Allow manual triggering
   push:
-    branches: [ main ]    # Trigger on pushes to main
-  pull_request:           # Trigger on PRs
+    branches: [ main ]
+  pull_request:
 
 jobs:
   test:
-    runs-on: ubuntu-24.04  # Newer Ubuntu version
-    timeout-minutes: 30   # Increase timeout for complex dependencies
+    runs-on: ubuntu-24.04  # Updated to latest Ubuntu version
+    timeout-minutes: 30
 
     steps:
       - name: Checkout code
@@ -22,7 +22,7 @@ jobs:
         with:
           python-version: '3.10'
           cache: 'pip'
-          cache-dependency-path: 'requirements.txt'  # Better caching
+          cache-dependency-path: 'requirements.txt'
 
       - name: Install system dependencies
         run: |
@@ -30,7 +30,7 @@ jobs:
           sudo apt-get install -y \
             libgl1-mesa-glx \
             xvfb \
-            libglib2.0-0  # Additional common GUI dependency
+            libglib2.0-0
 
       - name: Install Python dependencies
         run: |
@@ -39,9 +39,9 @@ jobs:
           pip install \
             pytest pytest-cov pytest-xdist pytest-html \
             PyQt5 pytest-qt \
-            opencv-python-headless \  # Lighter version for CI
+            opencv-python-headless \
             pandas numpy scikit-learn \
-            tensorflow-cpu torch \  # CPU-only versions for CI
+            tensorflow-cpu torch \
             requests flask flask-cors \
             matplotlib seaborn plotly \
             pymongo motor \
@@ -55,8 +55,7 @@ jobs:
             --cov-report=xml \
             --cov-report=html \
             --junitxml=test-results/results.xml \
-            -n auto \
-            --dist=worksteal  # Better parallel test distribution
+            -n auto
 
       - name: Upload test artifacts
         uses: actions/upload-artifact@v4  # Updated from v3
@@ -67,11 +66,8 @@ jobs:
             htmlcov/
             test-results/
             coverage.xml
-          retention-days: 7  # Auto-cleanup after 1 week
+          retention-days: 7
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4  # Updated from v3
         if: success()
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}  # If using Codecov
-          fail_ci_if_error: false  # Don't fail workflow on coverage upload issues
