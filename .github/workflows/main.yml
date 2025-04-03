@@ -2,8 +2,8 @@ name: Daily Tests
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # Runs at midnight UTC daily
-  workflow_dispatch:      # Allow manual triggering
+    - cron: '0 0 * * *'
+  workflow_dispatch:
 
 jobs:
   test:
@@ -11,24 +11,35 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v4
+      - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgl1-mesa-glx xvfb
+          sudo apt-get install -y \
+            libgl1-mesa-glx \
+            xvfb \
+            python3-dev
 
-      - name: Install Python dependencies
+      - name: Install Python packages
         run: |
           python -m pip install --upgrade pip
+          # Install only essential packages first
           pip install flask PyQt5 requests pytest pytest-qt
+          
+          # If you really need the other packages, install them separately
+          # with relaxed version constraints
+          pip install \
+            pandas \
+            scikit-learn \
+            matplotlib \
+            seaborn \
+            --no-deps  # Skip dependency resolution for these
 
-      - name: Run tests with Xvfb
+      - name: Run tests
         run: |
-          xvfb-run pytest tests/ --cov=.
+          xvfb-run pytest tests/
