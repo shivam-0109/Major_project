@@ -4,66 +4,31 @@ on:
   schedule:
     - cron: '0 0 * * *'  # Runs at midnight UTC daily
   workflow_dispatch:      # Allow manual triggering
-  push:
-    branches: [ main ]
-  pull_request:
 
 jobs:
   test:
-    runs-on: ubuntu-24.04  # Updated to latest Ubuntu version
-    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4  # Updated from v3
+        uses: actions/checkout@v4
 
       - name: Set up Python 3.10
-        uses: actions/setup-python@v5  # Updated from v3
+        uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-          cache: 'pip'
-          cache-dependency-path: 'requirements.txt'
 
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            xvfb \
-            libglib2.0-0
+          sudo apt-get install -y libgl1-mesa-glx xvfb
 
       - name: Install Python dependencies
         run: |
-          python -m pip install --upgrade pip wheel setuptools
-          pip install -r requirements.txt --no-cache-dir
-          pip install \
-            pytest pytest-cov pytest-xdist pytest-html \
-            PyQt5 pytest-qt \
-            opencv-python-headless \
-            pandas numpy  \
-            requests flask flask-cors \
-            matplotlib seaborn plotly \
-             
+          python -m pip install --upgrade pip
+          pip install flask PyQt5 requests pytest pytest-qt
 
       - name: Run tests with Xvfb
         run: |
-          xvfb-run -a pytest tests/ \
-            --cov=. \
-            --cov-report=xml \
-            --cov-report=html \
-            --junitxml=test-results/results.xml \
-            -n auto
-
-      - name: Upload test artifacts
-        uses: actions/upload-artifact@v4  # Updated from v3
-        if: always()
-        with:
-          name: test-reports-${{ github.run_id }}
-          path: |
-            htmlcov/
-            test-results/
-            coverage.xml
-          retention-days: 7
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4  # Updated from v3
-        if: success()
+          xvfb-run pytest tests/ --cov=.
