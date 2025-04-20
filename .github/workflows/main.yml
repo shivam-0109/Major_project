@@ -42,7 +42,10 @@ jobs:
             pandas \
             scikit-learn \
             matplotlib \
-            seaborn
+            seaborn \
+            pytest-cov \
+            pytest-xml \
+            pytest-qt
 
       - name: Run Pytest with Coverage
         run: |
