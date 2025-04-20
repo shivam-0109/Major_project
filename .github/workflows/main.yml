@@ -11,8 +11,10 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout Latest Branch
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Gets full history (useful for future Git features)
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -42,6 +44,6 @@ jobs:
             matplotlib \
             seaborn
 
-      - name: Run Tests
+      - name: Run Pytest
         run: |
-          xvfb-run pytest tests/
+          pytest
