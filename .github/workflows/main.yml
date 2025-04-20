@@ -51,29 +51,25 @@ jobs:
           pytest --cov=. --cov-report=xml --cov-report=html
 
       - name: Save Coverage to DevOps Branch
+        env:
+          TOKEN: "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"
         run: |
-          # Configure Git
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-          # Create temp directory to hold results
+      
           mkdir -p temp_coverage
           cp -r htmlcov temp_coverage/htmlcov
           cp coverage.xml temp_coverage/
-
-          # Checkout devops branch (create if not exists)
-          git fetch origin devops || true
-          git checkout -B devops origin/devops || git checkout -b devops
-
-          # Clean previous coverage files
-          rm -rf htmlcov coverage.xml || true
-
-          # Move new reports into place
+      
+          git fetch origin
+          git checkout -B devops || git checkout -b devops
+      
           rm -rf htmlcov coverage.xml
           mv temp_coverage/htmlcov .
           mv temp_coverage/coverage.xml .
-
-          # Commit and push
+      
           git add htmlcov coverage.xml
           git commit -m "Daily Coverage Report - $(date -u '+%Y-%m-%d')" || echo "No changes to commit"
+      
+          git remote set-url origin https://x-access-token:${TOKEN}@github.com/${{ github.repository }}
           git push origin devops
