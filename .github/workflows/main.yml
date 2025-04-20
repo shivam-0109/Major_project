@@ -52,7 +52,7 @@ jobs:
 
       - name: Save Coverage to DevOps Branch
         env:
-          TOKEN: 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
+          TOKEN: "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"  # Add your PAT token directly here (not recommended)
         run: |
           # Configure Git user
           git config --global user.name "github-actions[bot]"
