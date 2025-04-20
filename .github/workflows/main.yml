@@ -14,7 +14,7 @@ jobs:
       - name: Checkout Latest Branch
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # Gets full history (useful for future Git features)
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -27,8 +27,7 @@ jobs:
           sudo apt-get install -y \
             libgl1 \
             xvfb \
-            python3-dev \
-            git
+            python3-dev
 
       - name: Install Python Packages
         run: |
@@ -40,36 +39,35 @@ jobs:
             requests \
             pytest \
             pytest-qt \
-            pytest-cov \
             pandas \
             scikit-learn \
             matplotlib \
             seaborn
 
-      - name: Run Tests with Coverage
+      - name: Run Pytest
         run: |
-          pytest --cov=. --cov-report=xml --cov-report=html
+          pytest
 
       - name: Save Coverage to DevOps Branch
         env:
-          TOKEN: "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"
+          TOKEN: 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
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-      
+
           mkdir -p temp_coverage
           cp -r htmlcov temp_coverage/htmlcov
           cp coverage.xml temp_coverage/
-      
+
           git fetch origin
           git checkout -B devops || git checkout -b devops
-      
+
           rm -rf htmlcov coverage.xml
           mv temp_coverage/htmlcov .
           mv temp_coverage/coverage.xml .
-      
+
           git add htmlcov coverage.xml
           git commit -m "Daily Coverage Report - $(date -u '+%Y-%m-%d')" || echo "No changes to commit"
-      
+
           git remote set-url origin https://x-access-token:${TOKEN}@github.com/${{ github.repository }}
           git push origin devops
