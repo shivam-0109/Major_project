@@ -2,7 +2,7 @@ name: Daily Tests
 
 on:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 0 * * *'  # Runs daily at midnight UTC
   workflow_dispatch:
 
 jobs:
@@ -11,13 +11,15 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
-      - name: Install system dependencies
+      - name: Install System Dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -25,21 +27,21 @@ jobs:
             xvfb \
             python3-dev
 
-      - name: Install Python packages
+      - name: Install Python Packages
         run: |
           python -m pip install --upgrade pip
-          # Install only essential packages first
-          pip install flask PyQt5 requests pytest pytest-qt flask-cors
-          
-          # If you really need the other packages, install them separately
-          # with relaxed version constraints
           pip install \
+            flask \
+            flask-cors \
+            PyQt5 \
+            requests \
+            pytest \
+            pytest-qt \
             pandas \
             scikit-learn \
             matplotlib \
-            seaborn \
-            --no-deps  # Skip dependency resolution for these
+            seaborn
 
-      - name: Run tests
+      - name: Run Tests
         run: |
           xvfb-run pytest tests/
