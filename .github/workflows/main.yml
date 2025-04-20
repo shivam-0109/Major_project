@@ -29,7 +29,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           # Install only essential packages first
-          pip install flask PyQt5 requests pytest pytest-qt
+          pip install flask PyQt5 requests pytest pytest-qt flask-cors
           
           # If you really need the other packages, install them separately
           # with relaxed version constraints
